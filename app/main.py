@@ -1,21 +1,8 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from enum import Enum
+
+from app.schemas import Event
 
 app = FastAPI()
-
-class LogLevel(str, Enum):
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    CRITICAL = "CRITICAL"
-
-
-class Event(BaseModel):
-    service: str
-    level: LogLevel
-    message: str
-    response_time: int
 
 
 @app.get("/")
