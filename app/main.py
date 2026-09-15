@@ -1,6 +1,13 @@
-def main():
-    print("DevOps Incident Tracker started")
+from fastapi import FastAPI
+
+app = FastAPI()
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+def root():
+    return {"message": "DevOps Incident Tracker API"}
+
+
+@app.get("/events")
+def get_events():
+    return {"events": []}
