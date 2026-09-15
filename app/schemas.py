@@ -10,7 +10,15 @@ class LogLevel(str, Enum):
     CRITICAL = "CRITICAL"
 
 
-class Event(BaseModel):
+class EventCreate(BaseModel):
+    service: str
+    level: LogLevel
+    message: str
+    response_time: int
+
+
+class EventResponse(BaseModel):
+    id: int
     service: str
     level: LogLevel
     message: str
