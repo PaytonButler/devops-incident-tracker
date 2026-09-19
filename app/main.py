@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Event
-from app.schemas import EventCreate, EventResponse
+from app.schemas import EventCreate, EventResponse, LogLevel
 
 app = FastAPI()
 
@@ -15,8 +15,19 @@ def root():
 
 
 @app.get("/events", response_model=list[EventResponse])
-def get_events(db: Session = Depends(get_db)):
+def get_events(
+    level: LogLevel | None = None,
+    service: str | None = None,
+    db: Session = Depends(get_db)
+):
     statement = select(Event)
+
+    if level is not None:
+        statement = statement.where(Event.level == level.value)
+
+    if service is not None:
+        statement = statement.where(Event.service == service)
+
     events = db.scalars(statement).all()
 
     return events
