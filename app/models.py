@@ -1,5 +1,5 @@
 from sqlalchemy import String, create_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
 class Base(DeclarativeBase):
@@ -17,5 +17,7 @@ class Event(Base):
 
 
 engine = create_engine("sqlite:///incident_tracker.db")
+
+SessionLocal = sessionmaker(bind=engine)
 
 Base.metadata.create_all(engine)
