@@ -23,11 +23,23 @@ def get_events(db: Session = Depends(get_db)):
 
 
 @app.post("/events", response_model=EventResponse)
-def create_event(event: EventCreate):
-    return {
-        "id": 1,
-        "service": event.service,
-        "level": event.level,
-        "message": event.message,
-        "response_time": event.response_time
-    }
+def create_event(
+    event: EventCreate,
+    db: Session = Depends(get_db)
+):
+    db_event = Event(
+        service=event.service,
+        level=event.level.value,
+        message=event.message,
+        response_time=event.response_time
+    )
+
+    try:
+        db.add(db_event)
+        db.commit()
+        db.refresh(db_event)
+    except Exception:
+        db.rollback()
+        raise
+
+    return db_event
