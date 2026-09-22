@@ -50,3 +50,91 @@ def test_create_event_rejects_invalid_level(client):
     response = client.post("/events", json=payload)
 
     assert response.status_code == 422
+
+def test_filter_events_by_level(client):
+    client.post("/events", json={
+        "service": "payment-service",
+        "level": "ERROR",
+        "message": "Payment failed",
+        "response_time": 3000
+    })
+
+    client.post("/events", json={
+        "service": "auth-service",
+        "level": "INFO",
+        "message": "User logged in",
+        "response_time": 200
+    })
+
+    response = client.get("/events", params={"level": "ERROR"})
+
+    assert response.status_code == 200
+    events = response.json()
+
+    assert len(events) == 1
+    assert events[0]["level"] == "ERROR"
+
+
+def test_filter_events_by_service(client):
+    client.post("/events", json={
+        "service": "payment-service",
+        "level": "ERROR",
+        "message": "Payment failed",
+        "response_time": 3000
+    })
+
+    client.post("/events", json={
+        "service": "auth-service",
+        "level": "INFO",
+        "message": "User logged in",
+        "response_time": 200
+    })
+
+    response = client.get(
+        "/events",
+        params={"service": "payment-service"}
+    )
+
+    assert response.status_code == 200
+    events = response.json()
+
+    assert len(events) == 1
+    assert events[0]["service"] == "payment-service"
+
+
+def test_filter_events_by_level_and_service(client):
+    client.post("/events", json={
+        "service": "payment-service",
+        "level": "ERROR",
+        "message": "Payment failed",
+        "response_time": 3000
+    })
+
+    client.post("/events", json={
+        "service": "payment-service",
+        "level": "INFO",
+        "message": "Payment processed",
+        "response_time": 200
+    })
+
+    client.post("/events", json={
+        "service": "auth-service",
+        "level": "ERROR",
+        "message": "Login failed",
+        "response_time": 500
+    })
+
+    response = client.get(
+        "/events",
+        params={
+            "level": "ERROR",
+            "service": "payment-service"
+        }
+    )
+
+    assert response.status_code == 200
+    events = response.json()
+
+    assert len(events) == 1
+    assert events[0]["level"] == "ERROR"
+    assert events[0]["service"] == "payment-service"
