@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LogLevel(str, Enum):
@@ -14,7 +14,7 @@ class EventCreate(BaseModel):
     service: str
     level: LogLevel
     message: str
-    response_time: int
+    response_time: int = Field(ge=0)
 
 
 class EventResponse(BaseModel):

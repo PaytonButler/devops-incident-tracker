@@ -163,3 +163,26 @@ def test_filter_events_rejects_invalid_level(client):
     )
 
     assert response.status_code == 422
+
+def test_create_event_rejects_negative_response_time(client):
+    payload = {
+        "service": "payment-service",
+        "level": "ERROR",
+        "message": "Invalid response time",
+        "response_time": -500
+    }
+
+    response = client.post("/events", json=payload)
+
+    assert response.status_code == 422
+
+def test_create_event_rejects_missing_message(client):
+    payload = {
+        "service": "payment-service",
+        "level": "ERROR",
+        "response_time": 500
+    }
+
+    response = client.post("/events", json=payload)
+
+    assert response.status_code == 422
