@@ -138,3 +138,28 @@ def test_filter_events_by_level_and_service(client):
     assert len(events) == 1
     assert events[0]["level"] == "ERROR"
     assert events[0]["service"] == "payment-service"
+
+def test_get_events_returns_empty_list_when_no_events_exist(client):
+    response = client.get("/events")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_filter_events_returns_empty_list_when_no_match(client):
+    response = client.get(
+        "/events",
+        params={"service": "nonexistent-service"}
+    )
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_filter_events_rejects_invalid_level(client):
+    response = client.get(
+        "/events",
+        params={"level": "BANANA"}
+    )
+
+    assert response.status_code == 422
