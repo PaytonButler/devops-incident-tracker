@@ -1,4 +1,4 @@
-from sqlalchemy import String, create_engine
+from sqlalchemy import ForeignKey, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
@@ -14,6 +14,15 @@ class Event(Base):
     level: Mapped[str] = mapped_column(String(20))
     message: Mapped[str] = mapped_column(String(500))
     response_time: Mapped[int]
+
+class Incident(Base):
+    __tablename__ = "incidents"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    event_id: Mapped[int] = mapped_column(ForeignKey("events.id"))
+    service: Mapped[str] = mapped_column(String(100))
+    level: Mapped[str] = mapped_column(String(20))
+    message: Mapped[str] = mapped_column(String(500))
 
 
 engine = create_engine("sqlite:///incident_tracker.db")

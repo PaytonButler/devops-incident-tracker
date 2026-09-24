@@ -186,3 +186,44 @@ def test_create_event_rejects_missing_message(client):
     response = client.post("/events", json=payload)
 
     assert response.status_code == 422
+
+
+def test_error_event_creates_incident(client):
+    payload = {
+        "service": "payment-service",
+        "level": "ERROR",
+        "message": "Database connection failed",
+        "response_time": 3500
+    }
+
+    event_response = client.post("/events", json=payload)
+
+    assert event_response.status_code == 200
+
+    incident_response = client.get("/incidents")
+
+    assert incident_response.status_code == 200
+    incidents = incident_response.json()
+
+    assert len(incidents) == 1
+    assert incidents[0]["event_id"] == event_response.json()["id"]
+    assert incidents[0]["service"] == "payment-service"
+    assert incidents[0]["level"] == "ERROR"
+
+
+def test_info_event_does_not_create_incident(client):
+    payload = {
+        "service": "auth-service",
+        "level": "INFO",
+        "message": "User logged in",
+        "response_time": 150
+    }
+
+    event_response = client.post("/events", json=payload)
+
+    assert event_response.status_code == 200
+
+    incident_response = client.get("/incidents")
+
+    assert incident_response.status_code == 200
+    assert incident_response.json() == []

@@ -25,3 +25,12 @@ class EventResponse(BaseModel):
     level: LogLevel
     message: str
     response_time: int
+
+class IncidentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    event_id: int
+    service: str
+    level: LogLevel
+    message: str
