@@ -73,8 +73,15 @@ def create_event(
 
 
 @app.get("/incidents", response_model=list[IncidentResponse])
-def get_incidents(db: Session = Depends(get_db)):
+def get_incidents(
+    status: IncidentStatus | None = None,
+    db: Session = Depends(get_db)
+):
     statement = select(Incident)
+
+    if status is not None:
+        statement = statement.where(Incident.status == status.value)
+
     incidents = db.scalars(statement).all()
 
     return incidents

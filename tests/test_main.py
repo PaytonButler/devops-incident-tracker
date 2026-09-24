@@ -290,3 +290,57 @@ def test_resolve_nonexistent_incident_returns_404(client):
     response = client.patch("/incidents/9999/resolve")
 
     assert response.status_code == 404
+
+
+def test_filter_incidents_by_open_status(client):
+    client.post("/events", json={
+        "service": "payment-service",
+        "level": "ERROR",
+        "message": "Payment failed",
+        "response_time": 500
+    })
+
+    response = client.get(
+        "/incidents",
+        params={"status": "OPEN"}
+    )
+
+    assert response.status_code == 200
+    incidents = response.json()
+
+    assert len(incidents) == 1
+    assert incidents[0]["status"] == "OPEN"
+
+
+def test_filter_incidents_by_resolved_status(client):
+    client.post("/events", json={
+        "service": "payment-service",
+        "level": "ERROR",
+        "message": "Payment failed",
+        "response_time": 500
+    })
+
+    incidents = client.get("/incidents").json()
+    incident_id = incidents[0]["id"]
+
+    client.patch(f"/incidents/{incident_id}/resolve")
+
+    response = client.get(
+        "/incidents",
+        params={"status": "RESOLVED"}
+    )
+
+    assert response.status_code == 200
+    resolved_incidents = response.json()
+
+    assert len(resolved_incidents) == 1
+    assert resolved_incidents[0]["status"] == "RESOLVED"
+
+
+def test_filter_incidents_rejects_invalid_status(client):
+    response = client.get(
+        "/incidents",
+        params={"status": "BANANA"}
+    )
+
+    assert response.status_code == 422
