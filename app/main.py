@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.incident_rules import is_incident
+from app.incident_rules import is_incident, is_high_latency
 from app.models import Event, Incident
 from app.schemas import EventCreate, EventResponse, IncidentResponse, LogLevel
 
@@ -52,7 +52,7 @@ def create_event(
         db.flush()
 
         # Create an incident if the event's level triggers the rule.
-        if is_incident(db_event.level):
+        if (is_incident(db_event.level) or is_high_latency(db_event.response_time)):
             db_incident = Incident(
                 event_id=db_event.id,
                 service=db_event.service,

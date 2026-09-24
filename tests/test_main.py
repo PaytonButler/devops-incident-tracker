@@ -227,3 +227,24 @@ def test_info_event_does_not_create_incident(client):
 
     assert incident_response.status_code == 200
     assert incident_response.json() == []
+
+def test_high_latency_event_creates_incident(client):
+    payload = {
+        "service": "inventory-service",
+        "level": "WARNING",
+        "message": "Service response was too slow",
+        "response_time": 2500
+    }
+
+    event_response = client.post("/events", json=payload)
+
+    assert event_response.status_code == 200
+
+    incident_response = client.get("/incidents")
+
+    assert incident_response.status_code == 200
+    incidents = incident_response.json()
+
+    assert len(incidents) == 1
+    assert incidents[0]["event_id"] == event_response.json()["id"]
+    assert incidents[0]["service"] == "inventory-service"
