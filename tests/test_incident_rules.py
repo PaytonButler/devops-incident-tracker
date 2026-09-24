@@ -29,3 +29,4 @@ def test_response_time_at_threshold_is_not_high_latency():
 
 def test_response_time_below_threshold_is_not_high_latency():
     assert is_high_latency(150) is False
+    
