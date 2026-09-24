@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import ForeignKey, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
@@ -25,7 +26,15 @@ class Incident(Base):
     message: Mapped[str] = mapped_column(String(500))
     status: Mapped[str] = mapped_column(String(20), default="OPEN", server_default="OPEN")
 
-engine = create_engine("sqlite:///incident_tracker.db")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///incident_tracker.db",
+)
+
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False},
+)
 
 SessionLocal = sessionmaker(bind=engine)
 
