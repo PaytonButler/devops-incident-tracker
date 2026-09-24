@@ -8,3 +8,7 @@ A FastAPI backend for ingesting, storing, and filtering application events.
 - Retrieve and filter events
 - Validate incoming event data
 - Persist events using SQLAlchemy and SQLite
+
+## Development
+
+This project uses pytest for automated testing.
