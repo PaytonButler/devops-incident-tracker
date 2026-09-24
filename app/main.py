@@ -1,11 +1,11 @@
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.incident_rules import is_incident, is_high_latency
 from app.models import Event, Incident
-from app.schemas import EventCreate, EventResponse, IncidentResponse, LogLevel
+from app.schemas import EventCreate, EventResponse, IncidentResponse, LogLevel, IncidentStatus
 
 app = FastAPI()
 
@@ -78,3 +78,25 @@ def get_incidents(db: Session = Depends(get_db)):
     incidents = db.scalars(statement).all()
 
     return incidents
+
+
+@app.patch("/incidents/{incident_id}/resolve",
+           response_model=IncidentResponse)
+def resolve_incident(
+    incident_id: int,
+    db: Session = Depends(get_db)
+):
+    incident = db.get(Incident, incident_id)
+
+    if incident is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Incident not found"
+        )
+
+    incident.status = IncidentStatus.RESOLVED.value
+
+    db.commit()
+    db.refresh(incident)
+
+    return incident

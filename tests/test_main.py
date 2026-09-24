@@ -248,3 +248,45 @@ def test_high_latency_event_creates_incident(client):
     assert len(incidents) == 1
     assert incidents[0]["event_id"] == event_response.json()["id"]
     assert incidents[0]["service"] == "inventory-service"
+
+
+def test_new_incident_has_open_status(client):
+    client.post("/events", json={
+        "service": "payment-service",
+        "level": "ERROR",
+        "message": "Payment failed",
+        "response_time": 500
+    })
+
+    response = client.get("/incidents")
+
+    assert response.status_code == 200
+    incidents = response.json()
+
+    assert len(incidents) == 1
+    assert incidents[0]["status"] == "OPEN"
+
+
+def test_resolve_incident(client):
+    client.post("/events", json={
+        "service": "payment-service",
+        "level": "ERROR",
+        "message": "Payment failed",
+        "response_time": 500
+    })
+
+    incidents = client.get("/incidents").json()
+    incident_id = incidents[0]["id"]
+
+    response = client.patch(
+        f"/incidents/{incident_id}/resolve"
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "RESOLVED"
+
+
+def test_resolve_nonexistent_incident_returns_404(client):
+    response = client.patch("/incidents/9999/resolve")
+
+    assert response.status_code == 404

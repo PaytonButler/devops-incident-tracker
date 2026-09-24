@@ -23,7 +23,7 @@ class Incident(Base):
     service: Mapped[str] = mapped_column(String(100))
     level: Mapped[str] = mapped_column(String(20))
     message: Mapped[str] = mapped_column(String(500))
-
+    status: Mapped[str] = mapped_column(String(20), default="OPEN", server_default="OPEN")
 
 engine = create_engine("sqlite:///incident_tracker.db")
 

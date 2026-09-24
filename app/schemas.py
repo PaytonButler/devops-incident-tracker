@@ -34,3 +34,8 @@ class IncidentResponse(BaseModel):
     service: str
     level: LogLevel
     message: str
+    status: IncidentStatus
+
+class IncidentStatus(str, Enum):
+    OPEN = "OPEN"
+    RESOLVED = "RESOLVED"
