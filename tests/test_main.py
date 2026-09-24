@@ -344,3 +344,21 @@ def test_filter_incidents_rejects_invalid_status(client):
     )
 
     assert response.status_code == 422
+
+def test_warning_event_at_latency_threshold_does_not_create_incident(client):
+    response = client.post(
+        "/events",
+        json={
+            "service": "api",
+            "level": "WARNING",
+            "message": "Latency at threshold",
+            "response_time": 2000,
+        },
+    )
+
+    assert response.status_code == 200
+
+    incidents_response = client.get("/incidents")
+
+    assert incidents_response.status_code == 200
+    assert incidents_response.json() == []
